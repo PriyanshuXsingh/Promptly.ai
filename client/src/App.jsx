@@ -9,7 +9,7 @@ import GenerateImages from "./pages/GenerateImages.jsx";
 import RemoveBackground from "./pages/RemoveBackground.jsx";
 import RemoveObject from "./pages/RemoveObject.jsx";
 import ReviewResume from "./pages/ReviewResume.jsx";
-import Community from "./pages/community.jsx";
+import Community from "./pages/Community.jsx";
 import { useAuth } from "@clerk/clerk-react";
 import { useEffect } from "react";
 import {Toaster} from "react-hot-toast";  
