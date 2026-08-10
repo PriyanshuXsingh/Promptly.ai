@@ -87,7 +87,85 @@ const ReviewResume = () => {
         ) : (
           <div className="mt-3 h-full overflow-y-scroll text-sm text-slate-600">
             <div className="reset-tw">
-              <Markdown>{content}</Markdown>
+              <Markdown
+  components={{
+    h2: ({ children }) => (
+      <h2 className="text-xl font-bold text-slate-800 mt-6 mb-3 pb-2 border-b border-gray-200">
+        {children}
+      </h2>
+    ),
+
+    h3: ({ children }) => (
+      <h3 className="text-base font-semibold text-slate-800 mt-5 mb-2">
+        {children}
+      </h3>
+    ),
+
+    p: ({ children }) => (
+      <p className="text-sm leading-7 text-slate-600 mb-3">
+        {children}
+      </p>
+    ),
+
+    ul: ({ children }) => (
+      <ul className="list-disc pl-5 space-y-2 mb-4 text-sm text-slate-600">
+        {children}
+      </ul>
+    ),
+
+    ol: ({ children }) => (
+      <ol className="list-decimal pl-5 space-y-2 mb-4 text-sm text-slate-600">
+        {children}
+      </ol>
+    ),
+
+    li: ({ children }) => (
+      <li className="leading-6">
+        {children}
+      </li>
+    ),
+
+    strong: ({ children }) => (
+      <strong className="font-semibold text-slate-800">
+        {children}
+      </strong>
+    ),
+
+    table: ({ children }) => (
+      <div className="overflow-x-auto my-4">
+        <table className="w-full text-sm border-collapse border border-gray-200 rounded-lg">
+          {children}
+        </table>
+      </div>
+    ),
+
+    thead: ({ children }) => (
+      <thead className="bg-gray-50">
+        {children}
+      </thead>
+    ),
+
+    th: ({ children }) => (
+      <th className="border border-gray-200 px-3 py-2 text-left font-semibold text-slate-700">
+        {children}
+      </th>
+    ),
+
+    td: ({ children }) => (
+      <td className="border border-gray-200 px-3 py-2 align-top text-slate-600">
+        {children}
+      </td>
+    ),
+
+    blockquote: ({ children }) => (
+      <blockquote className="border-l-4 border-[#00DA83] pl-4 my-4 italic text-slate-500">
+        {children}
+      </blockquote>
+    ),
+  }}
+>
+  {content}
+</Markdown>
             </div>
           </div>
         )}
