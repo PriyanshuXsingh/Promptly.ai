@@ -247,7 +247,75 @@ export const resumeReview = async (req, res) => {
     const dataBuffer = fs.readFileSync(resume.path);
     const pdfData = await pdf(dataBuffer);
 
-    const prompt = `Review the following resume and provide constructive feedback on its strengths, weakness,and areas for improvement.Resume Content:\n\n${pdfData.text}`;
+   const prompt = `
+You are a professional resume reviewer and career coach.
+
+Analyze the resume carefully and provide a clean, professional, easy-to-read review.
+
+IMPORTANT FORMATTING RULES:
+- Return ONLY Markdown.
+- Do NOT use HTML tags such as <br>, <p>, <div>, etc.
+- Do NOT use raw HTML.
+- Use clear Markdown headings with ## and ###.
+- Use bullet points where appropriate.
+- Use numbered lists for ordered recommendations.
+- Use Markdown tables only when they genuinely improve readability.
+- Keep each section concise and well organized.
+- Do not repeat the same information.
+- Give specific and actionable recommendations.
+
+Use exactly this structure:
+
+## Overall Impression
+
+Give a short overall assessment of the resume.
+
+## Key Strengths
+
+- Strength 1
+- Strength 2
+- Strength 3
+
+## Areas for Improvement
+
+### 1. Header & Contact Information
+Explain what is good and what should be improved.
+
+### 2. Summary / Objective
+Explain what should be improved.
+
+### 3. Education
+Give feedback.
+
+### 4. Skills
+Give feedback.
+
+### 5. Projects
+Give feedback.
+
+### 6. Experience
+Give feedback.
+
+### 7. Achievements & Certifications
+Give feedback.
+
+### 8. Formatting & ATS
+Give feedback.
+
+## Priority Improvements
+
+1. Most important improvement
+2. Second most important improvement
+3. Third most important improvement
+
+## Final Verdict
+
+Give a concise final assessment and mention what the candidate should focus on first.
+
+RESUME CONTENT:
+
+${pdfData.text}
+`;
 
     const response = await AI.chat.completions.create({
       model: "openai/gpt-oss-20b",
