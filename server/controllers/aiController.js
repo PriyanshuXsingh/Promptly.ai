@@ -105,7 +105,7 @@ export const generateBlogTitle = async (req, res) => {
 export const generateImage = async (req, res) => {
   try {
     const { userId } = req.auth();
-    const { prompt, publish,style} = req.body;
+    const { prompt, publish } = req.body;
     const plan = req.plan;
 
     if (plan !== "premium") {
@@ -115,38 +115,74 @@ export const generateImage = async (req, res) => {
       });
     }
 
-    // ✅ FormData for ImagineArt API
+    // Clipdrop API expects multipart/form-data
     const formData = new FormData();
     formData.append("prompt", prompt);
-    formData.append("style", style?.toLowerCase() );
-    const hfResponse = await axios.post(
-      "https://api.vyro.ai/v2/image/generations",
+
+    const clipdropResponse = await axios.post(
+      "https://clipdrop-api.co/text-to-image/v1",
       formData,
       {
         headers: {
-          Authorization: `Bearer ${process.env.IMAGINE_API_KEY}`,
-          ...formData.getHeaders(), // very important
+          "x-api-key": process.env.CLIPDROP_API_KEY,
+          ...formData.getHeaders(),
         },
-        responseType: "arraybuffer", // because it returns image
+        responseType: "arraybuffer",
       }
     );
 
+    // Convert returned PNG bytes to Base64
     const base64Image = `data:image/png;base64,${Buffer.from(
-      hfResponse.data,
-      "binary"
+      clipdropResponse.data
     ).toString("base64")}`;
 
-    const { secure_url } = await cloudinary.uploader.upload(base64Image);
+    // Upload generated image to Cloudinary
+    const { secure_url } = await cloudinary.uploader.upload(base64Image, {
+      resource_type: "image",
+    });
 
+    // Save generated image in database
     await sql`
       INSERT INTO creations (user_id, prompt, content, type, publish)
-      VALUES (${userId}, ${prompt}, ${secure_url}, 'image', ${publish ?? false})
+      VALUES (
+        ${userId},
+        ${prompt},
+        ${secure_url},
+        'image',
+        ${publish ?? false}
+      )
     `;
 
-    res.json({ success: true, content: secure_url });
+    res.json({
+      success: true,
+      content: secure_url,
+    });
+
   } catch (error) {
-    console.log("🔥 ImagineArt generateImage Error:", error.response?.data || error.message);
-    res.json({ success: false, message: error.message });
+    let errorData = error.response?.data;
+
+    // Clipdrop returns JSON for errors
+    if (Buffer.isBuffer(errorData)) {
+      try {
+        errorData = JSON.parse(errorData.toString("utf8"));
+      } catch {
+        errorData = errorData.toString("utf8");
+      }
+    }
+
+    console.error("🔥 Clipdrop Image Error:", {
+      status: error.response?.status,
+      data: errorData,
+      message: error.message,
+    });
+
+    res.status(500).json({
+      success: false,
+      message:
+        errorData?.error ||
+        error.message ||
+        "Image generation failed",
+    });
   }
 };
 
